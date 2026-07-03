@@ -31,7 +31,7 @@ BASE_URL = os.environ.get(
 
 
 def _headers() -> dict:
-    api_key = os.environ.get("COGNEE_API_KEY", "")
+    api_key = os.environ.get("COGNEE_API_KEY", "").strip()
     if not api_key:
         raise EnvironmentError(
             "COGNEE_API_KEY environment variable is not set. "
