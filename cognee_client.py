@@ -1,20 +1,20 @@
-"""
-cognee_client.py — Cognee Cloud REST API client.
+﻿"""
+cognee_client.py â€” Cognee Cloud REST API client.
 
 Environment variables required:
-  COGNEE_API_KEY   – API key for authentication
-  COGNEE_BASE_URL  – e.g. https://tenant-xxxx.aws.cognee.ai (no trailing slash, no /api)
+  COGNEE_API_KEY   â€“ API key for authentication
+  COGNEE_BASE_URL  â€“ e.g. https://tenant-xxxx.aws.cognee.ai (no trailing slash, no /api)
 
 Endpoint mapping (verified live against the tenant with real curl tests):
-  remember_ticket_message  → POST /api/v1/remember  (multipart, datasetName)  [confirmed]
-  recall_for_customer      → POST /api/v1/recall     (JSON body, datasetName)  [confirmed]
-  resolve_and_improve      → POST /api/v1/remember  (multipart, datasetName)  [confirmed]
-  forget_dataset            → POST /api/v1/forget     (JSON body, dataset)     [confirmed]
+  remember_ticket_message  â†’ POST /api/v1/remember  (multipart, datasetName)  [confirmed]
+  recall_for_customer      â†’ POST /api/v1/recall     (JSON body, datasetName)  [confirmed]
+  resolve_and_improve      â†’ POST /api/v1/remember  (multipart, datasetName)  [confirmed]
+  forget_dataset            â†’ POST /api/v1/forget     (JSON body, dataset)     [confirmed]
 
 Design note: both remember_ticket_message and resolve_and_improve now write
 into the same per-customer dataset (customer_{id}), rather than the earlier
 two-tier session/dataset split. This trades a faster "session cache" write
-for a single, fully-tested code path — every write costs ~8-10s (real
+for a single, fully-tested code path â€” every write costs ~8-10s (real
 Cognee ingest against the LLM), acceptable for demo message volumes.
 """
 
@@ -62,7 +62,7 @@ async def remember_ticket_message(content: str, customer_id: str):
         await _remember_to_dataset(content, dataset, "ticket_message.txt")
         return "remembered"
     except Exception as exc:
-        return f"cognee skipped: {exc}"
+        return f"cognee skipped: {type(exc).__name__}: {exc}"
 
 
 async def recall_for_customer(query: str, customer_id: str):
@@ -83,7 +83,7 @@ async def recall_for_customer(query: str, customer_id: str):
         results = response.json()
         return "recalled", normalize_results(results, dataset)
     except Exception as exc:
-        return f"cognee skipped: {exc}", []
+        return f"cognee skipped: {type(exc).__name__}: {exc}", []
 
 
 async def resolve_and_improve(resolution_content: str, customer_id: str):
@@ -92,7 +92,7 @@ async def resolve_and_improve(resolution_content: str, customer_id: str):
         await _remember_to_dataset(resolution_content, dataset, "resolution.txt")
         return "improved"
     except Exception as exc:
-        return f"cognee skipped: {exc}"
+        return f"cognee skipped: {type(exc).__name__}: {exc}"
 
 
 async def forget_dataset(customer_id: str):
@@ -108,7 +108,7 @@ async def forget_dataset(customer_id: str):
             response.raise_for_status()
         return "forgotten"
     except Exception as exc:
-        return f"cognee skipped: {exc}"
+        return f"cognee skipped: {type(exc).__name__}: {exc}"
 
 
 def normalize_results(result: Any, dataset: str = None) -> list:
