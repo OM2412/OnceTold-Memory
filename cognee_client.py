@@ -1,4 +1,4 @@
-﻿"""
+"""
 cognee_client.py â€” Cognee Cloud REST API client.
 
 Environment variables required:
@@ -73,7 +73,9 @@ async def recall_for_customer(query: str, customer_id: str):
         "top_k": 5,
     }
     try:
-        async with httpx.AsyncClient(base_url=BASE_URL, timeout=60.0) as client:
+        # Cognee Cloud's real graph completion queries can take close to 60s,
+        # so the previous 60.0 timeout was cutting them off right at the edge.
+        async with httpx.AsyncClient(base_url=BASE_URL, timeout=120.0) as client:
             response = await client.post(
                 "/api/v1/recall",
                 headers={**_headers(), "Content-Type": "application/json"},
